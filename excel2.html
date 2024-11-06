@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display Spare Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        /* Header styles */
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Remove the search input style */
+    </style>
+</head>
+<body>
+    <h1>CONSUMED SPARE DATA</h1>
+    <h2>Displaying Spare Data</h2>
+    
+    <!-- Add a "Download Excel" button -->
+    <button id="downloadExcel">Download Excel</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Spare Part</th>
+                <th>Date</th>
+                <th>Quantity</th>
+                <th>Consumed Spares quantity</th>
+                <th>Consumed machine</th>
+            </tr>
+        </thead>
+        <tbody id="addedDataBody"></tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const addedDataTableBody = document.getElementById("addedDataBody");
+            
+            // Function to update the added data table
+            function updateAddedDataTable() {
+                const addedData = JSON.parse(localStorage.getItem("addedSpareData")) || [];
+                addedDataTableBody.innerHTML = "";
+
+                addedData.forEach((rowData) => {
+                    const row = document.createElement("tr");
+
+                    // Exclude the last element (photo) from the rowData
+                    for (let i = 0; i < rowData.length - 1; i++) {
+                        const cellData = rowData[i];
+                        const cell = document.createElement("td");
+                        cell.textContent = cellData;
+                        row.appendChild(cell);
+                    }
+
+                    addedDataTableBody.appendChild(row);
+                });
+            }
+
+            // Call the function to update the added data table when the page loads
+            updateAddedDataTable();
+
+            // Function to download table data as Excel
+            function downloadExcel() {
+                const addedData = JSON.parse(localStorage.getItem("addedSpareData")) || [];
+
+                // Create a CSV string from the data
+                const csvContent = "Machine,Spare Part,Date,Quantity,Consumed Spares,Consumed machine\n" +
+                    addedData.map(rowData => rowData.slice(0, -1).join(",")).join("\n");
+
+                // Create a Blob containing the CSV data
+                const blob = new Blob([csvContent], { type: "text/csv" });
+
+                // Create a download link and trigger the download
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "consumed_spare_data.csv";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            // Add a click event listener to the "Download Excel" button
+            document.getElementById("downloadExcel").addEventListener("click", downloadExcel);
+        });
+    </script>
+</body>
+</html>
+
+
+

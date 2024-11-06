@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display Added Spare Data</title>
+    <style>
+         body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        /* Header styles */
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        /* Form section styles */
+        .form-section {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            max-width: 500px;
+        }
+
+        /* Form input styles */
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        input[type="date"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Submit button styles */
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Search input style */
+        #searchInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Image style */
+        img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+
+        .form-section {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CONSUMED SPARES</h1>
+    <!-- New form section -->
+    <div class="form-section">
+        <h2>Add Spare Data</h2>
+        <form id="spareForm">
+            <label for="machineSelect">Machine Name:</label>
+            <select id="machineSelect" name="machine">
+                <!-- Populate options dynamically using JavaScript -->
+            </select>
+
+            <label for="spareSelect">Spare Part:</label>
+            <select id="spareSelect" name="spare">
+                <!-- Populate options dynamically using JavaScript -->
+            </select>
+
+            <label for="quantityInput">Quantity:</label>
+            <input type="number" id="quantityInput" name="quantity" min="1" required>
+
+            <label for="consumedInput">Consumed Spares:</label>
+            <input type="number" id="consumedInput" name="consumed" min="0" required>
+
+            <label for="consumedMachineSelect">Consumed Machine:</label>
+            <select id="consumedMachineSelect" name="consumedMachine">
+                <option value="LPP1">LPP1</option>
+                <option value="LPP2">LPP2</option>
+                <option value="LMF120">LMF120</option>
+                <option value="LSPB50">LSPB50</option>
+                <option value="LAUT">LAUT</option>
+                <option value="LPVB">LPVB</option>
+                <option value="LFNC">LFNC</option>
+                <option value="LACL">LACL</option>
+                <option value="LCPA">LCPA</option>
+            </select>
+
+            <label for="dateInput">Date:</label>
+            <input type="date" id="dateInput" name="date" required>
+
+            <label for="photoInput">Upload Old Photo:</label>
+            <input type="file" id="photoInput" name="photo" accept="image/*">
+
+            <button type="submit">Add Data</button>
+        </form>
+    </div>
+    <h2>Added Spare Data</h2>
+    <label for="searchInput">Search:</label>
+    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Enter search term...">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Machine</th>
+                <th>Spare Part</th>
+                <th>Date</th>
+                <th>Quantity</th>
+                <th>Consumed Spares</th>
+                <th>Consumed Machine</th>
+                <th>Photo</th>
+            </tr>
+        </thead>
+        <tbody id="addedDataBody"></tbody>
+    </table>
+
+
+    <script>
+        // Your existing JavaScript code here
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const machineSelect = document.getElementById("machineSelect");
+            const spareSelect = document.getElementById("spareSelect");
+            const addedDataTableBody = document.getElementById("addedDataBody");
+
+            // Function to populate the machine and spare part select options
+            function populateSelectOptions() {
+                const storedData = JSON.parse(localStorage.getItem("spareData")) || [];
+                const machines = new Set();
+                const spareParts = new Set();
+
+                storedData.forEach((rowData) => {
+                    machines.add(rowData[1]); // Assuming machine name is in the second column
+                    spareParts.add(rowData[2]); // Assuming spare part name is in the third column
+                });
+
+                // Clear existing options
+                machineSelect.innerHTML = "";
+                spareSelect.innerHTML = "";
+
+                // Populate machine and spare part options
+                machines.forEach((machine) => {
+                    const option = document.createElement("option");
+                    option.value = machine;
+                    option.textContent = machine;
+                    machineSelect.appendChild(option);
+                });
+
+                spareParts.forEach((sparePart) => {
+                    const option = document.createElement("option");
+                    option.value = sparePart;
+                    option.textContent = sparePart;
+                    spareSelect.appendChild(option);
+                });
+            }
+
+            // Call the function to populate options when the page loads
+            populateSelectOptions();
+
+            // Function to update the added data table
+            function updateAddedDataTable() {
+                const addedData = JSON.parse(localStorage.getItem("addedSpareData")) || [];
+                addedDataTableBody.innerHTML = "";
+
+                addedData.forEach((rowData) => {
+                    const row = document.createElement("tr");
+
+                    rowData.forEach((cellData, index) => {
+                        const cell = document.createElement("td");
+                        if (index === 6) { // Check if it's the photo cell
+                            const img = document.createElement("img");
+                            img.src = cellData; // Set the image source to the data URL
+                            img.width = 100; // Adjust the image width as needed
+                            cell.appendChild(img);
+                        } else {
+                            cell.textContent = cellData;
+                        }
+                        row.appendChild(cell);
+                    });
+
+                    addedDataTableBody.appendChild(row);
+                });
+            }
+
+            // Call the function to update the added data table when the page loads
+            updateAddedDataTable();
+
+            // Function to perform table search
+            function searchTable() {
+                const searchInput = document.getElementById("searchInput");
+                const filter = searchInput.value.toUpperCase();
+                const table = document.querySelector("#addedDataBody");
+                const rows = table.getElementsByTagName("tr");
+
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName("td");
+                    let found = false;
+
+                    for (let j = 0; j < cells.length; j++) {
+                        const cell = cells[j];
+
+                        if (cell) {
+                            const textValue = cell.textContent || cell.innerText;
+
+                            if (textValue.toUpperCase().indexOf(filter) > -1) {
+                                found = true;
+                                break; // If a match is found, no need to check other cells in this row
+                            }
+                        }
+                    }
+
+                    if (found) {
+                        rows[i].style.display = ""; // Show the row
+                    } else {
+                        rows[i].style.display = "none"; // Hide the row
+                    }
+                }
+            }
+            searchInput.addEventListener("input", function () {
+                searchTable();
+            });
+
+            // Handle form submission
+            const spareForm = document.getElementById("spareForm");
+            spareForm.addEventListener("submit", function (e) {
+                e.preventDefault(); // Prevent the form from submitting
+
+                // Get selected values
+                const machineValue = machineSelect.value;
+                const spareValue = spareSelect.value;
+                const quantityValue = document.getElementById("quantityInput").value;
+                const consumedValue = document.getElementById("consumedInput").value;
+                const consumedMachineValue = document.getElementById("consumedMachineSelect").value;
+                const dateValue = document.getElementById("dateInput").value;
+
+                // Get the uploaded photo
+                const photoInput = document.getElementById("photoInput");
+                const photoFile = photoInput.files[0]; // Get the uploaded file
+
+                // Check if a file was uploaded
+                if (photoFile) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const photoDataUrl = e.target.result;
+
+                        // Create a new row including the photo data URL and Consumed Machine
+                        const newRowData = [machineValue, spareValue, dateValue, quantityValue, consumedValue, consumedMachineValue, photoDataUrl];
+                        const isConfirmed = window.confirm("Are you sure you want to add this data?");
+
+                        if (isConfirmed) {
+                            // Add the new row to added data
+                            const addedData = JSON.parse(localStorage.getItem("addedSpareData")) || [];
+                            addedData.push(newRowData);
+                            localStorage.setItem("addedSpareData", JSON.stringify(addedData));
+
+                            // Update the added data table, reset the form, and clear the search input
+                            updateAddedDataTable();
+                            spareForm.reset();
+                            searchInput.value = "";
+                            searchTable();
+                        }
+                    };
+
+                    // Read the uploaded file as a data URL
+                    reader.readAsDataURL(photoFile);
+                } else {
+                    // Handle the case where no file was uploaded (optional)
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+

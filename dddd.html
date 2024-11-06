@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display Spare Data</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>STORED SPARE DATA</h1>
+
+    <!-- Add search input field -->
+    <label for="search">Search: </label>
+    <input type="text" id="search" onkeyup="searchTable()" placeholder="Search for data...">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Machine</th>
+                <th>Spare Part</th>
+                <th>In Time</th>
+                <th>Consumer Name</th>
+                <th>Supplier Name</th>
+                <th>Location</th>
+                <th>Cost</th>
+                <th>Quantity</th>
+                <th>PR Number</th>
+            </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+    </table>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTableBody = document.getElementById("dataBody");
+            let originalData = [];
+
+            function updateDataTable() {
+                const storedData = JSON.parse(localStorage.getItem("spareData")) || [];
+
+                // Store the original data for filtering
+                originalData = storedData.slice();
+
+                storedData.forEach((rowData) => {
+                    const row = document.createElement("tr");
+
+                    rowData.forEach((cellData, index) => {
+                        const cell = document.createElement(index === 0 ? "td" : "td");
+                        
+                        if (index === 0) {
+                            const img = document.createElement("img");
+                            img.src = cellData;
+                            img.style.maxWidth = "100px";
+                            cell.appendChild(img);
+                        } else {
+                            cell.textContent = cellData;
+                        }
+                        
+                        row.appendChild(cell);
+                    });
+
+                    dataTableBody.appendChild(row);
+                });
+            }
+
+            function searchTable() {
+                const searchInput = document.getElementById("search");
+                const filter = searchInput.value.toUpperCase();
+
+                const filteredData = originalData.filter((rowData) => {
+                    return rowData.some((cellData) => {
+                        return cellData.toUpperCase().indexOf(filter) > -1;
+                    });
+                });
+
+                while (dataTableBody.firstChild) {
+                    dataTableBody.removeChild(dataTableBody.firstChild);
+                }
+
+                filteredData.forEach((rowData) => {
+                    const row = document.createElement("tr");
+
+                    rowData.forEach((cellData, index) => {
+                        const cell = document.createElement(index === 0 ? "td" : "td");
+
+                        if (index === 0) {
+                            const img = document.createElement("img");
+                            img.src = cellData;
+                            img.style.maxWidth = "100px";
+                            cell.appendChild(img);
+                        } else {
+                            cell.textContent = cellData;
+                        }
+
+                        row.appendChild(cell);
+                    });
+
+                    dataTableBody.appendChild(row);
+                });
+            }
+
+            // Attach the searchTable function to the input field's keyup event
+            document.getElementById("search").addEventListener("keyup", searchTable);
+
+            updateDataTable();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Machine Repair Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        .form-section {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            max-width: 500px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        input[type="date"],
+        input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+    </style>
+</head>
+<body>
+<h1>ADD SPARE</h1>
+<div class="form-section">
+    <form id="spareForm">
+        <!-- Upload Photo Field -->
+        <label for="photo">Upload Photo:</label>
+        <input type="file" id="photo" name="photo" accept="image/*">
+        <img id="uploadedImage" src="placeholder.png" alt="Uploaded Image" style="max-width: 100px; display: none;">
+
+        <label for="machine">Machine:</label>
+        <input type="text" id="machine" name="machine">
+
+        <label for="sparePart">Spare Part Name:</label>
+        <input type="text" id="sparePart" name="sparePart">
+
+        <label for="inTime">In Time:</label>
+        <input type="date" id="inTime" name="inTime">
+
+        <label for="consumerName">Consumer Name:</label>
+        <input type="text" id="consumerName" name="consumerName">
+
+        <!-- New Supplier Name Field -->
+        <label for="supplierName">Supplier Name:</label>
+        <input type="text" id="supplierName" name="supplierName">
+
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location">
+
+        <label for="cost">Cost:</label>
+        <input type="number" id="cost" name="cost">
+
+        <!-- New Quantity Field -->
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity">
+
+        <!-- New PR Number Field -->
+        <label for="prNumber">PR Number:</label>
+        <input type="text" id="prNumber" name="prNumber">
+
+        <input type="submit" value="Submit" onclick="return confirm('Are you sure you want to submit?')">
+        <input type="button" value="Cancel" onclick="return confirm('Are you sure you want to cancel?')">
+    </form>
+</div>
+
+<h2>Stored Data</h2>
+<table id="dataTable">
+    <thead>
+    <tr>
+        <th>Photo</th>
+        <th>Machine</th>
+        <th>Spare Part</th>
+        <th>In Time</th>
+        <th>Consumer Name</th>
+        <th>Supplier Name</th> <!-- New Supplier Name Column -->
+        <th>Location</th>
+        <th>Cost</th>
+        <th>Quantity</th>
+        <th>PR Number</th>
+    </tr>
+    </thead>
+    <tbody id="dataBody"></tbody>
+</table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("spareForm");
+        const dataTableBody = document.getElementById("dataBody");
+        const photoInput = document.getElementById("photo");
+        const uploadedImage = document.getElementById("uploadedImage");
+
+        // Event listener for photo input change
+        photoInput.addEventListener("change", function () {
+            const file = photoInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadedImage.src = "placeholder.png";
+                uploadedImage.style.display = "none";
+            }
+        });
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const machine = form.machine.value;
+            const sparePart = form.sparePart.value;
+            const inTime = form.inTime.value;
+            const consumerName = form.consumerName.value;
+            const supplierName = form.supplierName.value; // Get Supplier Name value
+            const location = form.location.value;
+            const cost = form.cost.value;
+            const quantity = form.quantity.value;
+            const prNumber = form.prNumber.value;
+            const photoData = uploadedImage.src;
+
+            const rowData = [photoData, machine, sparePart, inTime, consumerName, supplierName, location, cost, quantity, prNumber];
+
+            const existingData = JSON.parse(localStorage.getItem("spareData")) || [];
+            existingData.push(rowData);
+            localStorage.setItem("spareData", JSON.stringify(existingData));
+
+            updateDataTable();
+
+            form.reset();
+        });
+
+        function updateDataTable() {
+            const storedData = JSON.parse(localStorage.getItem("spareData")) || [];
+            dataTableBody.innerHTML = "";
+
+            storedData.forEach(rowData => {
+                const row = document.createElement("tr");
+                rowData.forEach((cellData, index) => {
+                    const cell = document.createElement(index === 0 ? "td" : "td");
+                    if (index === 0) {
+                        const img = document.createElement("img");
+                        img.src = cellData;
+                        img.style.maxWidth = "100px";
+                        cell.appendChild(img);
+                    } else {
+                        cell.textContent = cellData;
+                    }
+                    row.appendChild(cell);
+                });
+                dataTableBody.appendChild(row);
+            });
+        }
+
+        updateDataTable();
+    });
+</script>
+</body>
+</html>

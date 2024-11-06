@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Machine Spare Parts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h2>Stored Data</h2>
+<button id="exportButton">Export as Excel</button>
+<table id="dataTable">
+    <thead>
+    <tr>
+        <th>Machine</th>
+        <th>Spare Part</th>
+        <th>In Time</th>
+        <th>Consumer Name</th>
+        <th>supplier name</th>
+        <th>Location</th>
+        <th>Cost</th>
+        <th>Quantity</th>
+        <th>PR Number</th>
+    </tr>
+    </thead>
+    <tbody id="dataBody"></tbody>
+</table>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const exportButton = document.getElementById("exportButton");
+
+        let tableData = [];
+
+        function updateDataTable() {
+            const storedData = JSON.parse(localStorage.getItem("spareData")) || [];
+            tableData = storedData.map(row => row.slice(1));
+            renderTable();
+        }
+
+        function renderTable() {
+            const dataTableBody = document.getElementById("dataBody");
+            dataTableBody.innerHTML = "";
+
+            tableData.forEach(rowData => {
+                const row = document.createElement("tr");
+                rowData.forEach(cellData => {
+                    const cell = document.createElement("td");
+                    cell.textContent = cellData;
+                    row.appendChild(cell);
+                });
+                dataTableBody.appendChild(row);
+            });
+        }
+
+        updateDataTable();
+
+        exportButton.addEventListener("click", function () {
+            if (tableData.length === 0) {
+                alert("No data to export.");
+                return;
+            }
+
+            const header = ["Machine", "Spare Part", "In Time", "Consumer Name","Supplier name", "Location", "Cost", "Quantity", "PR Number"];
+            const data = [header].concat(tableData);
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Spare Parts");
+
+            XLSX.writeFile(wb, "spare_parts.xlsx");
+        });
+    });
+</script>
+</body>
+</html>
+
+
+
